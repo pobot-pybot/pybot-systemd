@@ -12,12 +12,13 @@ ETC_SYSTEMD_SYSTEM = '/etc/systemd/system/'
 
 
 class SystemdSetupHelper(object):
-    def __init__(self, svc_name):
-        if not svc_name:
+    def __init__(self, svc_name, setup_pkg_name):
+        if not svc_name or not setup_pkg_name:
             raise ValueError('missing mandatory parameter')
 
         self._svc_name = svc_name
         self._svc_file_name = svc_name + '.service'
+        self._setup_pkg_name = setup_pkg_name
 
     @staticmethod
     def _check_if_root():
@@ -31,7 +32,7 @@ class SystemdSetupHelper(object):
             return False
 
         # copy the service descriptor file in the configuration directory
-        fn = pkg_resources.resource_filename('nros.core.setup', 'pkg_data/%s') % self._svc_file_name
+        fn = pkg_resources.resource_filename(self._setup_pkg_name, 'pkg_data/%s') % self._svc_file_name
         shutil.copy(fn, ETC_SYSTEMD_SYSTEM)
         # make systemd be aware of changes
         subprocess.check_output(['systemctl', '-q', 'daemon-reload'])
