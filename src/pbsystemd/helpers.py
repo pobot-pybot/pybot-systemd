@@ -9,7 +9,6 @@ import pkg_resources
 __author__ = 'Eric Pascual'
 
 ETC_SYSTEMD_SYSTEM = '/etc/systemd/system/'
-LIB_SYSTEMD_SYSTEM = '/lib/systemd/system/'
 
 
 class SystemdSetupHelper(object):
@@ -31,9 +30,9 @@ class SystemdSetupHelper(object):
         if os.path.exists(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name)):
             return False
 
-        # copy the service descriptor file in the blessed directory (/lib/systemd/system)
+        # copy the service descriptor file in the configuration directory
         fn = pkg_resources.resource_filename('nros.core.setup', 'pkg_data/%s') % self._svc_file_name
-        shutil.copy(fn, LIB_SYSTEMD_SYSTEM)
+        shutil.copy(fn, ETC_SYSTEMD_SYSTEM)
         # make systemd be aware of changes
         subprocess.check_output(['systemctl', '-q', 'daemon-reload'])
         # enable the service at system start
@@ -46,9 +45,7 @@ class SystemdSetupHelper(object):
     def remove_service(self):
         self._check_if_root()
 
-        try:
-            subprocess.check_output(['systemctl', '-q', 'is-enabled', self._svc_name])
-        except subprocess.CalledProcessError:
+        if not os.path.exists(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name)):
             return False
 
         # stop the service if currently running
@@ -61,7 +58,7 @@ class SystemdSetupHelper(object):
 
         # remove it
         subprocess.check_output(['systemctl', 'disable', self._svc_name])
-        os.remove(os.path.join(LIB_SYSTEMD_SYSTEM, self._svc_file_name))
+        os.remove(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name))
 
         # make systemd be aware of changes
         subprocess.check_output('systemctl daemon-reload'.split())
