@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import subprocess
 import shutil
 
@@ -65,3 +66,19 @@ class SystemdSetupHelper(object):
         subprocess.check_output('systemctl daemon-reload'.split())
 
         return True
+
+
+def install_service(svc_name, pkg):
+    try:
+        if not SystemdSetupHelper(svc_name, pkg).install_service():
+            print("already installed")
+    except RuntimeError as e:
+        sys.exit("ERROR: %s" % e)
+
+
+def remove_service(svc_name, pkg):
+    try:
+        if not SystemdSetupHelper(svc_name, pkg).remove_service():
+            print("not installed")
+    except RuntimeError as e:
+        sys.exit("ERROR: %s" % e)
