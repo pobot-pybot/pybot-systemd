@@ -8,7 +8,6 @@ import pkg_resources
 
 __author__ = 'Eric Pascual'
 
-ETC_SYSTEMD_SYSTEM = '/etc/systemd/system/'
 LIB_SYSTEMD_SYSTEM = '/lib/systemd/system/'
 
 
@@ -34,11 +33,6 @@ class SystemdSetupHelper(object):
         # copy the service descriptor file in the blessed directory (/lib/systemd/system)
         fn = pkg_resources.resource_filename('nros.core.setup', 'pkg_data/%s') % self._svc_file_name
         shutil.copy(fn, LIB_SYSTEMD_SYSTEM)
-        # symlink it in /etc/systemd/system
-        os.symlink(
-            os.path.join(LIB_SYSTEMD_SYSTEM, self._svc_file_name),
-            os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name)
-        )
         # make systemd be aware of changes
         subprocess.check_output(['systemctl', '-q', 'daemon-reload'])
         # enable the service at system start
@@ -66,7 +60,6 @@ class SystemdSetupHelper(object):
 
         # remove it
         subprocess.check_output(['systemctl', 'disable', self._svc_name])
-        os.remove(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name))
         os.remove(os.path.join(LIB_SYSTEMD_SYSTEM, self._svc_file_name))
 
         # make systemd be aware of changes

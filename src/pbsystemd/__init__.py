@@ -2,7 +2,5 @@
 
 import os
 
-from helpers import ETC_SYSTEMD_SYSTEM
-
-if not os.path.exists(ETC_SYSTEMD_SYSTEM):
+if not os.path.exists('/lib/systemd'):
     raise RuntimeError("systemd not installed")
