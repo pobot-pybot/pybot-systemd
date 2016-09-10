@@ -5,3 +5,4 @@ _build/
 build/
 fabfile.py
 .fab_tasks~
+__version__.py
