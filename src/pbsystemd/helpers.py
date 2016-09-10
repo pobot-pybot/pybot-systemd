@@ -36,11 +36,11 @@ class SystemdSetupHelper(object):
         fn = pkg_resources.resource_filename(self._setup_pkg_name, 'pkg_data/%s') % self._svc_file_name
         shutil.copy(fn, ETC_SYSTEMD_SYSTEM)
         # make systemd be aware of changes
-        subprocess.check_output(['systemctl', '-q', 'daemon-reload'])
+        subprocess.check_output(['systemctl', 'daemon-reload'])
         # enable the service at system start
-        subprocess.check_output(['systemctl', '-q', 'enable', self._svc_name])
+        subprocess.check_output(['systemctl', 'enable', self._svc_name])
         # start it now
-        subprocess.check_output(['systemctl', '-q', 'start', self._svc_name])
+        subprocess.check_output(['systemctl', 'start', self._svc_name])
 
         return True
 
@@ -63,7 +63,7 @@ class SystemdSetupHelper(object):
         os.remove(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name))
 
         # make systemd be aware of changes
-        subprocess.check_output('systemctl daemon-reload'.split())
+        subprocess.check_output(['systemctl', 'daemon-reload'])
 
         return True
 
