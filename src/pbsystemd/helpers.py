@@ -29,9 +29,6 @@ class SystemdSetupHelper(object):
     def install_service(self):
         self._check_if_root()
 
-        if os.path.exists(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name)):
-            return False
-
         # copy the service descriptor file in the configuration directory
         fn = pkg_resources.resource_filename(self._setup_pkg_name, 'pkg_data/%s') % self._svc_file_name
         shutil.copy(fn, ETC_SYSTEMD_SYSTEM)
@@ -39,8 +36,8 @@ class SystemdSetupHelper(object):
         subprocess.check_output(['systemctl', 'daemon-reload'])
         # enable the service at system start
         subprocess.check_output(['systemctl', 'enable', self._svc_name])
-        # start it now
-        subprocess.check_output(['systemctl', 'start', self._svc_name])
+        # (re)start it now
+        subprocess.check_output(['systemctl', 'restart', self._svc_name])
 
         return True
 
@@ -58,7 +55,7 @@ class SystemdSetupHelper(object):
         else:
             subprocess.check_output(['systemctl', 'stop', self._svc_name])
 
-        # remove it
+        # remove it from system start
         subprocess.check_output(['systemctl', 'disable', self._svc_name])
         os.remove(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name))
 
