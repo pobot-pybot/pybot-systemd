@@ -6,6 +6,7 @@ setup(
     use_scm_version={
         'write_to': 'src/pbsystemd/__version__.py'
     },
+    install_requires=['pkg_resources'],
     packages=find_packages("src"),
     package_dir={'': 'src'},
     url='',
