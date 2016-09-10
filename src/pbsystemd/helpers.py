@@ -13,13 +13,21 @@ ETC_SYSTEMD_SYSTEM = '/etc/systemd/system/'
 
 
 class SystemdSetupHelper(object):
-    def __init__(self, svc_name, setup_pkg_name):
+    def __init__(self, svc_name, setup_pkg_name, before_start=None, after_stop=None):
         if not svc_name or not setup_pkg_name:
             raise ValueError('missing mandatory parameter')
 
         self._svc_name = svc_name
         self._svc_file_name = svc_name + '.service'
         self._setup_pkg_name = setup_pkg_name
+
+        if before_start and not callable(before_start):
+            raise ValueError('before_start must be a callable')
+        self._before_start = before_start
+
+        if after_stop and not callable(after_stop):
+            raise ValueError('after_stop must be a callable')
+        self._after_stop = after_stop
 
     @staticmethod
     def _check_if_root():
@@ -37,6 +45,8 @@ class SystemdSetupHelper(object):
         # enable the service at system start
         subprocess.check_output(['systemctl', 'enable', self._svc_name])
         # (re)start it now
+        if self._before_start:
+            self._before_start()
         subprocess.check_output(['systemctl', 'restart', self._svc_name])
 
         return True
@@ -54,6 +64,8 @@ class SystemdSetupHelper(object):
             pass
         else:
             subprocess.check_output(['systemctl', 'stop', self._svc_name])
+            if self._after_stop:
+                self._after_stop()
 
         # remove it from system start
         subprocess.check_output(['systemctl', 'disable', self._svc_name])
@@ -65,17 +77,17 @@ class SystemdSetupHelper(object):
         return True
 
 
-def install_service(svc_name, pkg):
+def install_service(svc_name, pkg, before_start=None):
     try:
-        if not SystemdSetupHelper(svc_name, pkg).install_service():
+        if not SystemdSetupHelper(svc_name, pkg, before_start=before_start).install_service():
             print("already installed")
     except RuntimeError as e:
         sys.exit("ERROR: %s" % e)
 
 
-def remove_service(svc_name, pkg):
+def remove_service(svc_name, pkg, after_stop=None):
     try:
-        if not SystemdSetupHelper(svc_name, pkg).remove_service():
+        if not SystemdSetupHelper(svc_name, pkg, after_stop=after_stop).remove_service():
             print("not installed")
     except RuntimeError as e:
         sys.exit("ERROR: %s" % e)
