@@ -8,6 +8,7 @@ import pkg_resources
 
 __author__ = 'Eric Pascual'
 
+ETC_SYSTEMD_SYSTEM = '/etc/systemd/system/'
 LIB_SYSTEMD_SYSTEM = '/lib/systemd/system/'
 
 
@@ -27,7 +28,7 @@ class SystemdSetupHelper(object):
     def install_service(self):
         self._check_if_root()
 
-        if subprocess.call(['systemctl', '-q', 'is-enabled', self._svc_name]) == 0:
+        if os.path.exists(os.path.join(ETC_SYSTEMD_SYSTEM, self._svc_file_name)):
             return False
 
         # copy the service descriptor file in the blessed directory (/lib/systemd/system)
